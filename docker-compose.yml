@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # API Services
+  deliveries:
+    build:
+      context: .
+      dockerfile: deliveries/Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      DB_HOST: deliveries-db
+      DB_PORT: 3306
+      DB_USER: deliveries_user
+      DB_PASSWORD: deliveries_pass
+      DB_NAME: deliveries_db
+    networks:
+      - iae-network
+    depends_on:
+      deliveries-db:
+        condition: service_healthy
+
+  memberships:
+    build:
+      context: .
+      dockerfile: memberships/Dockerfile
+    ports:
+      - "4002:4002"
+    environment:
+      DB_HOST: memberships-db
+      DB_PORT: 3306
+      DB_USER: memberships_user
+      DB_PASSWORD: memberships_pass
+      DB_NAME: memberships_db
+    networks:
+      - iae-network
+    depends_on:
+      memberships-db:
+        condition: service_healthy
+
+  vendor_requests:
+    build:
+      context: .
+      dockerfile: vendor_requests/Dockerfile
+    ports:
+      - "4003:4003"
+    environment:
+      DB_HOST: vendor_requests-db
+      DB_PORT: 3306
+      DB_USER: vendor_requests_user
+      DB_PASSWORD: vendor_requests_pass
+      DB_NAME: vendor_requests_db
+    networks:
+      - iae-network
+    depends_on:
+      vendor_requests-db:
+        condition: service_healthy
+
+  # Databases (one per service)
+  deliveries-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: deliveries_user
+      MYSQL_PASSWORD: deliveries_pass
+      MYSQL_DATABASE: deliveries_db
+    volumes:
+      - deliveries-data:/var/lib/mysql
+    networks:
+      - iae-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  memberships-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: memberships_user
+      MYSQL_PASSWORD: memberships_pass
+      MYSQL_DATABASE: memberships_db
+    volumes:
+      - memberships-data:/var/lib/mysql
+    networks:
+      - iae-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  vendor_requests-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: vendor_requests_user
+      MYSQL_PASSWORD: vendor_requests_pass
+      MYSQL_DATABASE: vendor_requests_db
+    volumes:
+      - vendor-requests-data:/var/lib/mysql
+    networks:
+      - iae-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PHPMyAdmin configuration
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8089:80"
+    environment:
+      PMA_ARBITRARY: 1  # Allows connecting to multiple servers
+    networks:
+      - iae-network
+
+networks:
+  iae-network:
+    name: iae-network
+    driver: bridge
+    external: true
+
+volumes:
+  deliveries-data:
+  memberships-data:
+  vendor-requests-data:

@@ -1,6 +1,33 @@
 # Deliveries Service - GraphQL API Documentation
 
-## Mutations
+# Query
+## Get all deliveries
+```
+{
+  getAllDeliveries {
+    id
+    order_id
+    delivery_status
+    delivery_time
+    current_location
+  }
+}
+```
+## Get delivery by id
+```
+{
+  getDelivery(id:1){
+    id
+    order_id
+    delivery_status
+    delivery_time
+    current_location
+    
+  }
+}
+```
+
+# Mutations
 
 - createDelivery(input: DeliveryInput!): Delivery  
   Create a new delivery record.  

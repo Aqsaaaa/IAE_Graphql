@@ -1,22 +1,27 @@
 # Memberships Service - GraphQL API Documentation
 
-# GET BY ID
+# Get by id
+```
 query getMembership($id : ID!){
   getMembership(id:$id) {
     id
     user_id
     points
     user{
+      id
       name
+      phone
     }
   }  
 }
-# VARIABEL
+```
+# Variabel
 {
   "id" : 1
 }
 
 # GET ALL MEMBER
+```
 {
   getAllMemberships {
     id
@@ -24,10 +29,10 @@ query getMembership($id : ID!){
       name
       id
       phone
-      
     }
   }
 }
+```
 
 
 ## Mutations

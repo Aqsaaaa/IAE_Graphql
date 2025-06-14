@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Vendor-Delivery-Service</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <style>
+        body {
+            background-color: #0e101c;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        h3 {
+            color: #a3e635;
+        }
+
+        .btn-group .btn {
+            border-radius: 50px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 12px #22d3ee;
+        }
+
+        table.dataTable {
+            background-color: #1f2937;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table.dataTable thead {
+            background-color: #374151;
+            color: #10b981;
+        }
+
+        table.dataTable tbody tr:hover {
+            background-color: #2c3e50;
+            cursor: pointer;
+        }
+
+        .modal-content {
+            background-color: #1e293b;
+            color: white;
+        }
+
+        .modal-header,
+        .modal-footer {
+            border-color: #4b5563;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: #22d3ee;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(34, 211, 238, 0.5);
+        }
+
+        .form-control, .form-select {
+            background-color: #1f2937;
+            color: white;
+            border: 1px solid #4b5563;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #1f2937;
+            color: white;
+            border-color: #22d3ee;
+            box-shadow: 0 0 0 0.25rem rgba(34, 211, 238, 0.25);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5">
+        <h3 class="mb-4">Dashboard Vendor-Delivery-Service</h3>
+
+        <div class="btn-group mb-4">
+            <button class="btn btn-outline-info" id="btn-vendor">Vendor Requests</button>
+            <button class="btn btn-outline-success" id="btn-deliveries">Deliveries</button>
+            <button class="btn btn-outline-warning" id="btn-memberships">Memberships</button>
+        </div>
+
+        <div id="data-section">
+            <div id="loading">Loading data...</div>
+        </div>
+    </div>
+
+    <!-- Add Data Button -->
+    <button class="btn btn-primary add-btn" id="btn-add-data" data-bs-toggle="modal" data-bs-target="#addModal">
+        +
+    </button>
+
+    <!-- Modal Detail -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Data</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <pre class="text-white" id="modal-content-json"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Data Modal -->
+    <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addModalTitle">Add New Data</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="addModalBody">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn-submit-add">Add Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSRF Token Meta Tag -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        // Set up CSRF token for all AJAX requests
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        let currentDataType = 'vendor-requests';
+        const columnsMap = {
+            'vendor-requests': [
+                { data: 'id', title: 'ID' },
+                { data: 'vendor_id', title: 'Vendor ID' },
+                { data: 'ingredient_id', title: 'Ingredient ID' },
+                { data: 'quantity', title: 'Quantity' },
+                { data: 'status', title: 'Status' },
+                { data: 'requested_at', title: 'Request At' },
+                { data: 'estimated_arrival', title: 'Estimated Arrival' }
+            ],
+            'deliveries': [
+                { data: 'id', title: 'ID' },
+                { data: 'order_id', title: 'Order ID' },
+                { data: 'delivery_status', title: 'Status' },
+                { data: 'delivery_time', title: 'Time' },
+                { data: 'current_location', title: 'Location' }
+            ],
+            'memberships': [
+                { data: 'id', title: 'ID' },
+                { data: 'user_id', title: 'User ID' },
+                { data: 'points', title: 'Points' },
+                { data: 'user.name', title: 'User Name' },
+                { data: 'user.phone', title: 'User Phone' }
+            ]
+        };
+
+        const formTemplates = {
+            'vendor-requests': `
+                <div class="mb-3">
+                    <label for="vendor_id" class="form-label">Vendor ID</label>
+                    <input type="text" class="form-control" id="vendor_id" required>
+                </div>
+                <div class="mb-3">
+                    <label for="ingredient_id" class="form-label">Ingredient ID</label>
+                    <input type="text" class="form-control" id="ingredient_id" required>
+                </div>
+                <div class="mb-3">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <input type="number" class="form-control" id="quantity" required>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" required>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="delivered">Delivered</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="requested_at" class="form-label">Requested At</label>
+                    <input type="datetime-local" class="form-control" id="requested_at" required>
+                </div>
+                <div class="mb-3">
+                    <label for="estimated_arrival" class="form-label">Estimated Arrival</label>
+                    <input type="datetime-local" class="form-control" id="estimated_arrival" required>
+                </div>
+            `,
+            'deliveries': `
+                <div class="mb-3">
+                    <label for="order_id" class="form-label">Order ID</label>
+                    <input type="text" class="form-control" id="order_id" required>
+                </div>
+                <div class="mb-3">
+                    <label for="delivery_status" class="form-label">Status</label>
+                    <select class="form-select" id="delivery_status" required>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="delivery_time" class="form-label">Delivery Time</label>
+                    <input type="datetime-local" class="form-control" id="delivery_time" required>
+                </div>
+                <div class="mb-3">
+                    <label for="current_location" class="form-label">Current Location</label>
+                    <input type="text" class="form-control" id="current_location" required>
+                </div>
+            `,
+            'memberships': `
+                <div class="mb-3">
+                    <label for="user_id" class="form-label">User ID</label>
+                    <input type="text" class="form-control" id="user_id" required>
+                </div>
+                <div class="mb-3">
+                    <label for="points" class="form-label">Points</label>
+                    <input type="number" class="form-control" id="points" required>
+                </div>
+            `
+        };
+
+        function loadTable(type) {
+            currentDataType = type;
+            $('#data-section').html(`<div id="loading">Loading ${type.replace('-', ' ')}...</div>`);
+
+            const url = `/dashboard/${type}`;
+            $.ajax({
+                url: url,
+                type: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (data) {
+                    const columns = columnsMap[type];
+
+                    $('#data-section').html(`
+                        <table id="dataTable" class="display table table-bordered text-white w-100">
+                            <thead>
+                                <tr>${columns.map(col => `<th>${col.title}</th>`).join('')}</tr>
+                            </thead>
+                        </table>
+                    `);
+
+                    const table = $('#dataTable').DataTable({
+                        data: data,
+                        destroy: true,
+                        columns: columns.map(col => ({
+                            data: col.data,
+                            title: col.title,
+                            render: function (data, type, row) {
+                                if (col.data.includes('.')) {
+                                    return col.data.split('.').reduce((o, k) => (o || {})[k], row) ?? '-';
+                                }
+                                return data ?? '-';
+                            }
+                        }))
+                    });
+
+                    $('#dataTable tbody').on('click', 'tr', function () {
+                        const rowData = table.row(this).data();
+                        $('#modal-content-json').text(JSON.stringify(rowData, null, 2));
+                        new bootstrap.Modal(document.getElementById('detailModal')).show();
+                    });
+                },
+                error: function (xhr) {
+                    $('#data-section').html(`<div class="alert alert-danger">Failed to load data from ${url}</div>`);
+                }
+            });
+        }
+
+        function showAddModal() {
+            $('#addModalTitle').text(`Add New ${currentDataType.replace('-', ' ')}`);
+            $('#addModalBody').html(formTemplates[currentDataType]);
+            $('#addModal').modal('show');
+        }
+
+        function submitAddForm() {
+            let data = {};
+            let url = '';
+            
+            switch(currentDataType) {
+                case 'vendor-requests':
+                    data = {
+                        vendor_id: $('#vendor_id').val(),
+                        ingredient_id: $('#ingredient_id').val(),
+                        quantity: parseInt($('#quantity').val()),
+                        status: $('#status').val(),
+                        requested_at: $('#requested_at').val(),
+                        estimated_arrival: $('#estimated_arrival').val()
+                    };
+                    url = '/dashboard/create-vendor-request';
+                    break;
+                case 'deliveries':
+                    data = {
+                        order_id: $('#order_id').val(),
+                        delivery_status: $('#delivery_status').val(),
+                        delivery_time: $('#delivery_time').val(),
+                        current_location: $('#current_location').val()
+                    };
+                    url = '/dashboard/create-delivery';
+                    break;
+                case 'memberships':
+                    data = {
+                        user_id: $('#user_id').val(),
+                        points: parseInt($('#points').val())
+                    };
+                    url = '/dashboard/create-membership';
+                    break;
+            }
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: data,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    $('#addModal').modal('hide');
+                    loadTable(currentDataType);
+                    alert('Data added successfully!');
+                },
+                error: function(xhr) {
+                    alert('Error adding data: ' + (xhr.responseJSON?.message || 'Unknown error'));
+                }
+            });
+        }
+
+        // Button bindings
+        $('#btn-vendor').click(() => loadTable('vendor-requests'));
+        $('#btn-deliveries').click(() => loadTable('deliveries'));
+        $('#btn-memberships').click(() => loadTable('memberships'));
+        $('#btn-add-data').click(showAddModal);
+        $('#btn-submit-add').click(submitAddForm);
+
+        // Initial load
+        loadTable('vendor-requests');
+    </script>
+</body>
+
+</html>

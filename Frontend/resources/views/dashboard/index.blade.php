@@ -89,6 +89,43 @@
             border-color: #22d3ee;
             box-shadow: 0 0 0 0.25rem rgba(34, 211, 238, 0.25);
         }
+
+        .code-block {
+            background-color: #1f2937;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            border: 1px solid #4b5563;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #22d3ee;
+            color: #0e101c;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            background-color: #0ea5e9;
+        }
+
+        .doc-section {
+            margin-bottom: 30px;
+        }
+
+        .doc-section h4 {
+            color: #a3e635;
+            border-bottom: 1px solid #4b5563;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 
@@ -100,6 +137,7 @@
             <button class="btn btn-outline-info" id="btn-vendor">Vendor Requests</button>
             <button class="btn btn-outline-success" id="btn-deliveries">Deliveries</button>
             <button class="btn btn-outline-warning" id="btn-memberships">Memberships</button>
+            <button class="btn btn-outline-secondary" id="btn-readme">Read Me</button>
         </div>
 
         <div id="data-section">
@@ -108,7 +146,7 @@
     </div>
 
     <!-- Add Data Button -->
-    <button class="btn btn-primary add-btn" id="btn-add-data" data-bs-toggle="modal" data-bs-target="#addModal">
+    <button class="btn btn-primary add-btn" id="btn-add-data">
         +
     </button>
 
@@ -150,9 +188,6 @@
             </div>
         </div>
     </div>
-
-    <!-- CSRF Token Meta Tag -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -311,6 +346,294 @@
             });
         }
 
+        function showReadMe() {
+            const readMeContent = `
+                <div class="doc-section">
+                    <h4>Deliveries Service - GraphQL API Documentation</h4>
+                    
+                    <h5>Query</h5>
+                    <h6>Get all deliveries</h6>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>{
+  getAllDeliveries {
+    id
+    order_id
+    delivery_status
+    delivery_time
+    current_location
+  }
+}</pre>
+                    </div>
+                    
+                    <h6>Get delivery by id</h6>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>{
+  getDelivery(id:1){
+    id
+    order_id
+    delivery_status
+    delivery_time
+    current_location
+  }
+}</pre>
+                    </div>
+                    
+                    <h5>Mutations</h5>
+                    <p><strong>createDelivery(input: DeliveryInput!): Delivery</strong><br>
+                    Create a new delivery record.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  createDelivery(input: {
+    order_id: 1,
+    delivery_status: "assigned",
+    delivery_time: "2025-05-22T14:00:00Z",
+    current_location: "Warehouse"
+  }) {
+    id
+    order_id
+    delivery_status
+    delivery_time
+    current_location
+  }
+}</pre>
+                    </div>
+                    
+                    <p><strong>updateDelivery(id: ID!, input: DeliveryInput!): Delivery</strong><br>
+                    Update an existing delivery record.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  updateDelivery(id: 1, input: {
+    delivery_status: "on the way",
+    current_location: "On route"
+  }) {
+    id
+    delivery_status
+    current_location
+  }
+}</pre>
+                    </div>
+                    
+                    <p><strong>deleteDelivery(id: ID!): Boolean</strong><br>
+                    Delete a delivery record by ID.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  deleteDelivery(id: 1)
+}</pre>
+                    </div>
+                    
+                    <h5>Input Types</h5>
+                    <p>DeliveryInput:</p>
+                    <ul>
+                        <li>order_id: Int!</li>
+                        <li>delivery_status: String</li>
+                        <li>delivery_time: String</li>
+                        <li>current_location: String</li>
+                    </ul>
+                </div>
+                
+                <div class="doc-section">
+                    <h4>Memberships Service - GraphQL API Documentation</h4>
+                    
+                    <h5>Query</h5>
+                    <h6>Get by id</h6>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>query getMembership($id : ID!){
+  getMembership(id:$id) {
+    id
+    user_id
+    points
+    user{
+      id
+      name
+      phone
+    }
+  }  
+}</pre>
+                    </div>
+                    <p>Variables:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>{
+  "id" : 1
+}</pre>
+                    </div>
+                    
+                    <h6>Get all members</h6>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>{
+  getAllMemberships {
+    id
+    user {
+      name
+      id
+      phone
+    }
+  }
+}</pre>
+                    </div>
+                    
+                    <h5>Mutations</h5>
+                    <p><strong>createMembership(input: MembershipInput!): Membership</strong><br>
+                    Create a new membership record.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  createMembership(input: {
+    user_id: 1,
+    points: 100
+  }) {
+    id
+    user_id
+    points
+  }
+}</pre>
+                    </div>
+                    
+                    <p><strong>updateMembership(id: ID!, input: MembershipInput!): Membership</strong><br>
+                    Update an existing membership record.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  updateMembership(id: 1, input: {
+    points: 150
+  }) {
+    id
+    points
+  }
+}</pre>
+                    </div>
+                    
+                    <p><strong>deleteMembership(id: ID!): Boolean</strong><br>
+                    Delete a membership record by ID.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  deleteMembership(id: 1)
+}</pre>
+                    </div>
+                    
+                    <h5>Input Types</h5>
+                    <p>MembershipInput:</p>
+                    <ul>
+                        <li>user_id: Int!</li>
+                        <li>points: Int</li>
+                    </ul>
+                </div>
+                
+                <div class="doc-section">
+                    <h4>Vendor Requests Service - GraphQL API Documentation</h4>
+                    
+                    <h5>Query</h5>
+                    <h6>Get vendor by id</h6>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>{
+  getVendorRequest(id:1){
+    status
+    id
+    ingredient_id
+    estimated_arrival
+    requested_at
+  }
+}</pre>
+                    </div>
+                    
+                    <h6>Get all vendor request</h6>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>{
+  getAllVendorRequests{
+    status
+    id
+    ingredient_id
+    estimated_arrival
+    requested_at
+  }
+}</pre>
+                    </div>
+                    
+                    <h5>Mutations</h5>
+                    <p><strong>createVendorRequest(input: VendorRequestInput!): VendorRequest</strong><br>
+                    Create a new vendor request record.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  createVendorRequest(input: {
+    vendor_id: 1,
+    ingredient_id: 2,
+    quantity: 100,
+    status: "requested",
+    requested_at: "2025-05-22T14:00:00Z",
+    estimated_arrival: "2025-05-25T14:00:00Z"
+  }) {
+    id
+    vendor_id
+    ingredient_id
+    quantity
+    status
+    requested_at
+    estimated_arrival
+  }
+}</pre>
+                    </div>
+                    
+                    <p><strong>updateVendorRequest(id: ID!, input: VendorRequestInput!): VendorRequest</strong><br>
+                    Update an existing vendor request record.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  updateVendorRequest(id: 1, input: {
+    status: "on-delivery"
+  }) {
+    id
+    status
+  }
+}</pre>
+                    </div>
+                    
+                    <p><strong>deleteVendorRequest(id: ID!): Boolean</strong><br>
+                    Delete a vendor request record by ID.</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                        <pre>mutation {
+  deleteVendorRequest(id: 1)
+}</pre>
+                    </div>
+                    
+                    <h5>Input Types</h5>
+                    <p>VendorRequestInput:</p>
+                    <ul>
+                        <li>vendor_id: Int!</li>
+                        <li>ingredient_id: Int!</li>
+                        <li>quantity: Int!</li>
+                        <li>status: String</li>
+                        <li>requested_at: String</li>
+                        <li>estimated_arrival: String</li>
+                    </ul>
+                </div>
+            `;
+            
+            $('#data-section').html(readMeContent);
+        }
+
+        function copyToClipboard(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
         function showAddModal() {
             $('#addModalTitle').text(`Add New ${currentDataType.replace('-', ' ')}`);
             $('#addModalBody').html(formTemplates[currentDataType]);
@@ -373,6 +696,7 @@
         $('#btn-vendor').click(() => loadTable('vendor-requests'));
         $('#btn-deliveries').click(() => loadTable('deliveries'));
         $('#btn-memberships').click(() => loadTable('memberships'));
+        $('#btn-readme').click(showReadMe);
         $('#btn-add-data').click(showAddModal);
         $('#btn-submit-add').click(submitAddForm);
 

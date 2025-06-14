@@ -1,6 +1,35 @@
 # Vendor Requests Service - GraphQL API Documentation
 
-## Mutations
+# Query
+## Get vendor by id
+
+```
+{
+  getVendorRequest(id:1){
+    status
+    id
+    ingredient_id
+    estimated_arrival
+    requested_at
+  }
+}
+```
+
+## Get all vendor request
+
+```
+{
+  getAllVendorRequests{
+    status
+    id
+    ingredient_id
+    estimated_arrival
+    requested_at
+  }
+}
+```
+
+# Mutations
 
 - createVendorRequest(input: VendorRequestInput!): VendorRequest  
   Create a new vendor request record.  

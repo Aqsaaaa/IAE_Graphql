@@ -19,7 +19,7 @@ This project consists of multiple microservices and a frontend application, orch
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Aqsaaaa/IAE_Graphql
    cd IAE_graphql
    ```
 
